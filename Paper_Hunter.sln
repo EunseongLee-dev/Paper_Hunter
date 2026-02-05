@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36908.2
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Paper_Hunter", "Paper_Hunter\Paper_Hunter.vcxproj", "{B2DB9ADE-CF0B-420C-A41A-745656B21211}"
+	ProjectSection(ProjectDependencies) = postProject
+		{74735664-3A6A-4F8A-A2F4-40C1BF87A0DC} = {74735664-3A6A-4F8A-A2F4-40C1BF87A0DC}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Engine", "Engine\Engine.vcxproj", "{74735664-3A6A-4F8A-A2F4-40C1BF87A0DC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B2DB9ADE-CF0B-420C-A41A-745656B21211}.Debug|x64.ActiveCfg = Debug|x64
+		{B2DB9ADE-CF0B-420C-A41A-745656B21211}.Debug|x64.Build.0 = Debug|x64
+		{B2DB9ADE-CF0B-420C-A41A-745656B21211}.Release|x64.ActiveCfg = Release|x64
+		{B2DB9ADE-CF0B-420C-A41A-745656B21211}.Release|x64.Build.0 = Release|x64
+		{74735664-3A6A-4F8A-A2F4-40C1BF87A0DC}.Debug|x64.ActiveCfg = Debug|x64
+		{74735664-3A6A-4F8A-A2F4-40C1BF87A0DC}.Debug|x64.Build.0 = Debug|x64
+		{74735664-3A6A-4F8A-A2F4-40C1BF87A0DC}.Release|x64.ActiveCfg = Release|x64
+		{74735664-3A6A-4F8A-A2F4-40C1BF87A0DC}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2509871D-F34B-4DAD-A178-F5BCD89A5422}
+	EndGlobalSection
+EndGlobal
