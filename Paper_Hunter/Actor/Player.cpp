@@ -2,6 +2,7 @@
 #include "Core/Input.h"
 #include "Engine/Engine.h"
 #include "Level/Level.h"
+#include "Level/PaperLevel.h"
 
 #include <iostream>
 #include <Windows.h>
@@ -13,6 +14,7 @@ Player::Player(const Vector2& position, PaperLevel* level)
 	sortingOrder = 10;
 }
 
+
 void Player::BeginPlay()
 {
 	Actor::BeginPlay();
@@ -21,6 +23,7 @@ void Player::BeginPlay()
 void Player::Tick(float deltaTime)
 {
 	super::Tick(deltaTime);
+
 
 	// Todo: ESC키 처리(Player)
 
@@ -37,19 +40,30 @@ void Player::Tick(float deltaTime)
 	{
 		// 이동 가능 여부 판단
 		Vector2 newPosition(GetPosition().x + 1, GetPosition().y);
-		if (owner->CanMove(GetPosition(), newPosition))
+		MoveResult result = owner->TryMove(newPosition);
+		if (result != MoveResult::Blocked)
 		{
 			SetPosition(newPosition);
+
+			if (result == MoveResult::GotPaper)
+			{
+				++paperCount;
+			}
 		}
 	}
-
 	if (Input::Get().GetKeyDown(VK_LEFT) && GetPosition().x > 0)
 	{
 		// 이동 가능 여부 판단
 		Vector2 newPosition(GetPosition().x - 1, GetPosition().y);
-		if (owner->CanMove(GetPosition(), newPosition))
+		MoveResult result = owner->TryMove(newPosition);
+		if (result != MoveResult::Blocked)
 		{
 			SetPosition(newPosition);
+
+			if (result == MoveResult::GotPaper)
+			{
+				++paperCount;
+			}
 		}
 	}
 
@@ -57,9 +71,15 @@ void Player::Tick(float deltaTime)
 	{
 		// 이동 가능 여부 판단
 		Vector2 newPosition(GetPosition().x, GetPosition().y + 1);
-		if (owner->CanMove(GetPosition(), newPosition))
+		MoveResult result = owner->TryMove(newPosition);
+		if (result != MoveResult::Blocked)
 		{
 			SetPosition(newPosition);
+
+			if (result == MoveResult::GotPaper)
+			{
+				++paperCount;
+			}
 		}
 	}
 
@@ -67,15 +87,26 @@ void Player::Tick(float deltaTime)
 	{
 		// 이동 가능 여부 판단
 		Vector2 newPosition(GetPosition().x, GetPosition().y - 1);
-		if (owner->CanMove(GetPosition(), newPosition))
+		MoveResult result = owner->TryMove(newPosition);
+		if (result != MoveResult::Blocked)
 		{
 			SetPosition(newPosition);
+
+			if (result == MoveResult::GotPaper)
+			{
+				++paperCount;
+			}
 		}
 	}
-
 }
+
 
 void Player::Draw()
 {
 	Actor::Draw();
+}
+
+int Player::GetPaperCount()
+{
+	return paperCount;
 }

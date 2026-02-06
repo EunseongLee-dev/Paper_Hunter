@@ -1,9 +1,11 @@
 #pragma once
 
 #include "Actor/Actor.h"
-#include "Level/PaperLevel.h"
+
 
 using namespace Wanted;
+
+class PaperLevel;
 
 class Player : public Actor
 {
@@ -12,13 +14,17 @@ class Player : public Actor
 public:
 	Player(const Vector2& position, PaperLevel* level);
 
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float deltaTime) override;
 	virtual void Draw() override;
 
+public:
+	int GetPaperCount();
+
 private:
 	PaperLevel* owner;
+	int paperCount = 0;
 
 };
-

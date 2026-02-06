@@ -3,6 +3,9 @@
 #include "Actor\Player.h"
 #include "Actor/Wall.h"
 #include "Actor\Ground.h"
+#include "Actor/Paper.h"
+#include "Util/Util.h"
+#include "Actor/Player.h"
 
 #include <iostream>
 
@@ -13,6 +16,9 @@ PaperLevel::PaperLevel()
 
 void PaperLevel::LoadMap(const char* filename)
 {
+	mapWidth = 0;
+	mapHeight = 0;
+
 	// 파일 로드
 	char path[2048] = {};
 	sprintf_s(path, "../Assets/%s", filename);
@@ -67,7 +73,12 @@ void PaperLevel::LoadMap(const char* filename)
 		// 개행 문자 처리
 		if (mapCharacter == '\n')
 		{
-			// y좌표 증가, x좌표 초기화
+			// y좌표 증가 및 계산, x좌표 초기화 및 계산
+			if (position.x > mapWidth)
+			{
+				mapWidth = position.x;
+			}
+
 			++position.y;
 			position.x = 0;
 			continue;
@@ -84,6 +95,10 @@ void PaperLevel::LoadMap(const char* filename)
 			AddNewActor(new Ground(position));
 			break;
 
+		case 'T':
+			AddNewActor(new Paper(position));
+			break;
+
 		case 'P':
 			AddNewActor(new Player(position, this));
 			break;
@@ -91,6 +106,7 @@ void PaperLevel::LoadMap(const char* filename)
 		// x좌표 증가 처리
 		++position.x;
 	}
+	mapHeight = position.y + 1;
 
 	// 버퍼 해제
 	delete[] data;
@@ -108,6 +124,12 @@ bool PaperLevel::CanMove(const Vector2& playerPosition, const Vector2& nextPosit
 		return true;
 	}
 
+	if (dynamic_cast<Paper*>(actor))
+	{
+		actor->Destroy();
+		return true;
+	}
+
 	if (dynamic_cast<Wall*>(actor))
 	{
 		return false;
@@ -116,7 +138,32 @@ bool PaperLevel::CanMove(const Vector2& playerPosition, const Vector2& nextPosit
 	return true;
 }
 
+MoveResult PaperLevel::TryMove(const Vector2& nextPosition)
+{
+	Actor* actor = GetActorAt(nextPosition);
+
+	if (!actor)
+	{
+		return MoveResult::Moved;
+	}
+	
+	if (dynamic_cast<Wall*>(actor))
+	{
+		return MoveResult::Blocked;
+	}
+
+	if (dynamic_cast<Paper*>(actor))
+	{
+		actor->Destroy();
+		return MoveResult::GotPaper;
+	}
+
+	return MoveResult::Moved;
+}
+
 void PaperLevel::Draw()
 {
 	super::Draw();
 }
+
+
