@@ -35,6 +35,13 @@ namespace Wanted
 		// 벽 확인 처리용 함수
 		Actor* GetActorAt(const Vector2& position);
 
+		// 맵 사이즈 반환 함수
+		virtual Vector2 GetRenderSize() const;
+
+		// 카메라 고정 함수
+		virtual Vector2 GetCameraTarget() const;
+
+
 	protected:
 		// 액터 배열.
 		std::vector<Actor*> actors;

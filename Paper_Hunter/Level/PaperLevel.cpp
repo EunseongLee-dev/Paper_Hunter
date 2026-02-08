@@ -6,12 +6,18 @@
 #include "Actor/Paper.h"
 #include "Util/Util.h"
 #include "Actor/Player.h"
+#include "Render/Renderer.h"
 
 #include <iostream>
 
 PaperLevel::PaperLevel()
 {
-	LoadMap("TestMap.txt");
+	LoadMap("PaperMap.txt");
+}
+
+Vector2 PaperLevel::GetRenderSize() const
+{
+	return Vector2(mapWidth, mapHeight);
 }
 
 void PaperLevel::LoadMap(const char* filename)
@@ -25,7 +31,7 @@ void PaperLevel::LoadMap(const char* filename)
 
 	// 파일 열기
 	FILE* file = nullptr;
-	fopen_s(&file, path, "rt");
+	fopen_s(&file, path, "rb");
 
 	// 예외 처리
 	if (!file)
@@ -61,13 +67,17 @@ void PaperLevel::LoadMap(const char* filename)
 	while (true)
 	{
 		// 종료 조건
-		if (index >= fileSize)
+		if (index >= readSize)
 		{
 			break;
 		}
 
 		// char 읽기
 		char mapCharacter = data[index];
+		if (mapCharacter == '/r')
+		{
+			continue;
+		}
 		++index;
 
 		// 개행 문자 처리
@@ -87,20 +97,23 @@ void PaperLevel::LoadMap(const char* filename)
 		// 문자 처리
 		switch (mapCharacter)
 		{
-		case '#':
+		case '@':
 			AddNewActor(new Wall(position));
 			break;
 			
-		case '.':
+		case ' ':
 			AddNewActor(new Ground(position));
 			break;
 
 		case 'T':
 			AddNewActor(new Paper(position));
+			++totalPaperCount;
 			break;
 
 		case 'P':
-			AddNewActor(new Player(position, this));
+			Player * p = new Player(position, this);
+			AddNewActor(p);
+			player = p;
 			break;
 		}
 		// x좌표 증가 처리
@@ -161,9 +174,80 @@ MoveResult PaperLevel::TryMove(const Vector2& nextPosition)
 	return MoveResult::Moved;
 }
 
+Vector2 PaperLevel::GetCameraTarget() const
+{
+	if (player)
+	{
+		return player->GetPosition();
+	}
+
+	return Vector2(0, 0);
+}
+
+bool PaperLevel::IsVisible(const Vector2& pos) const
+{
+	if (!player)
+	{
+		return false;
+	}
+
+	Vector2 diff = pos - player->GetPosition();
+
+	// 시야각 제한 사각형 or 원형
+	//return (abs(diff.x) <= viewRadius && abs(diff.y) <= viewRadius);
+	return (diff.x * diff.x + diff.y * diff.y <= viewRadius * viewRadius);
+}
+
+void PaperLevel::DrawUI(const Vector2& startPos, const char* text)
+{
+	// 예외처리
+	if (!player)
+	{
+		return;
+	}
+
+	Vector2 pos = startPos;
+
+	for (int i = 0; text[i] != '\0'; ++i)
+	{
+		char ch[2] = { text[i], '\0' };
+
+		Renderer::Get().Submit(ch, pos, Color::White, 100);
+
+		pos.x += 1;
+	}
+
+
+
+}
+
+void PaperLevel::Tick(float deltaTime)
+{
+	Level::Tick(deltaTime);
+
+	playTime += deltaTime;
+}
+
 void PaperLevel::Draw()
 {
-	super::Draw();
+	for (Actor* actor : actors)
+	{
+		if (IsVisible(actor->GetPosition()))
+		{
+			actor->Draw();
+		}
+	}
+
+	char buffer[64];
+
+	// Paper 출력
+	sprintf_s(buffer, "Paper: %d / %d", player->GetPaperCount(), PaperLevel::GetTotalPaperCount());
+	DrawUI(Vector2(0, 0), buffer);
+
+	// Time 출력
+	sprintf_s(buffer, "Time:  %.1f", playTime);
+	DrawUI(Vector2(0, 1), buffer);
 }
+
 
 

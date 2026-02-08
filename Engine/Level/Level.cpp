@@ -149,4 +149,12 @@ namespace Wanted
 		}
 		return nullptr;
 	}
+	Vector2 Level::GetRenderSize() const
+	{
+		return Vector2();
+	}
+	Vector2 Level::GetCameraTarget() const
+	{
+		return Vector2(0, 0);
+	}
 }

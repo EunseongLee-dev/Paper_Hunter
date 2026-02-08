@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Common/Common.h"
+#include "Math/Vector2.h"
 
 namespace Wanted
 {
@@ -46,6 +47,9 @@ namespace Wanted
 		// 화면 높이 반환 함수.
 		inline int GetHeight() const { return setting.height; }
 
+		// 카메라 위치 반환 함수
+		Vector2 GetCameraPosition() const;
+
 	protected:
 
 		// 정리 함수.
@@ -85,5 +89,9 @@ namespace Wanted
 
 		// 전역 변수.
 		static Engine* instance;
+
+		// 카메라 위치 저장 함수
+		Vector2 cameraPosition;
+
 	};
 }

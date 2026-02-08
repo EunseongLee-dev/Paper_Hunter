@@ -40,8 +40,11 @@ namespace Wanted
 	{
 		//Renderer::Draw(position, color, image);
 
+		Vector2 cameraPos = Engine::Get().GetCameraPosition();
+	/*	Vector2 screenPos = position - camera;*/
+
 		// 렌더러에 데이터 제출.
-		Renderer::Get().Submit(image, position, color, sortingOrder);
+		Renderer::Get().Submit(image, position - cameraPos, color, sortingOrder);
 	}
 
 	void Actor::Destroy()

@@ -4,6 +4,7 @@
 #include "Math/Color.h"
 #include <Windows.h>
 #include <vector>
+#include <string>
 
 namespace Wanted
 {
@@ -33,7 +34,8 @@ namespace Wanted
 		struct RenderCommand
 		{
 			// 화면에 보여줄 문자열 값.
-			const char* text = nullptr;
+			/*const char* text = nullptr;*/
+			std::string text;
 
 			// 좌표.
 			Vector2 position;
@@ -65,6 +67,7 @@ namespace Wanted
 
 		// 싱글톤 접근 함수.
 		static Renderer& Get();
+
 
 	private:
 

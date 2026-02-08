@@ -4,6 +4,7 @@
 #include "Util/Util.h"
 #include "Render/Renderer.h"
 
+
 #include <iostream>
 #include <Windows.h>
 
@@ -24,7 +25,8 @@ namespace Wanted
 		LoadSetting();
 
 		// 렌더러 객체 생성.
-		renderer = new Renderer(Vector2(setting.width, setting.height));
+		renderer = nullptr;
+		/*renderer = new Renderer(Vector2(setting.width, setting.height));*/
 
 		// 커서 끄기.
 		Util::TurnOffCursor();
@@ -55,6 +57,7 @@ namespace Wanted
 
 	void Engine::Run()
 	{
+
 		// 시계의 정밀도.
 		LARGE_INTEGER frequency;
 		QueryPerformanceFrequency(&frequency);
@@ -112,18 +115,18 @@ namespace Wanted
 					mainLevel->ProcessAddAndDestroyActors();
 				}
 
-				// 레벨 전환 처리.
-				if (nextLevel)
-				{
-					// 기존 레벨 제거.
-					SafeDelete(mainLevel);
+				//// 레벨 전환 처리.
+				//if (nextLevel)
+				//{
+				//	// 기존 레벨 제거.
+				//	SafeDelete(mainLevel);
 
-					// 전환할 레벨을 메인 레벨로 지정.
-					mainLevel = nextLevel;
+				//	// 전환할 레벨을 메인 레벨로 지정.
+				//	mainLevel = nextLevel;
 
-					// 포인터 정리.
-					nextLevel = nullptr;
-				}
+				//	// 포인터 정리.
+				//	nextLevel = nullptr;
+				//}
 			}
 		}
 
@@ -141,15 +144,25 @@ namespace Wanted
 		// 기존 레벨 있는지 확인.
 		// 있으면 기존 레벨 제거.
 		// 임시 코드. 레벨 전환할 때는 바로 제거하면 안됨.
-		nextLevel = newLevel;
-		//if (mainLevel)
-		//{
-		//	delete mainLevel;
-		//	mainLevel = nullptr;
-		//}
-		//
-		//// 레벨 설정.
-		//mainLevel = newLevel;
+
+	/*	nextLevel = newLevel;*/
+
+		if (mainLevel)
+		{
+			delete mainLevel;
+			mainLevel = nullptr;
+		}
+
+		mainLevel = newLevel;
+
+		if (renderer == nullptr && newLevel)
+		{
+			// 랜더러 객체 생성
+			renderer = new Renderer(Vector2(setting.width, setting.height));
+			//renderer = new Renderer(newLevel->GetRenderSize());
+		}
+
+		mainLevel->BeginPlay();
 	}
 
 	Engine& Engine::Get()
@@ -163,6 +176,11 @@ namespace Wanted
 		}
 
 		return *instance;
+	}
+
+	Vector2 Engine::GetCameraPosition() const
+	{
+		return cameraPosition;
 	}
 
 	void Engine::Shutdown()
@@ -256,6 +274,11 @@ namespace Wanted
 		}
 
 		mainLevel->Tick(deltaTime);
+
+		Vector2 target = mainLevel->GetCameraTarget();
+		
+		cameraPosition.x = target.x - setting.width / 2;
+		cameraPosition.y = target.y - setting.height / 2;
 	}
 
 	void Engine::Draw()
@@ -271,6 +294,10 @@ namespace Wanted
 		mainLevel->Draw();
 
 		// 렌더러에 그리기 명령 전달.
-		renderer->Draw();
+		if (renderer)
+		{
+			renderer->Draw();
+		}
+
 	}
 }

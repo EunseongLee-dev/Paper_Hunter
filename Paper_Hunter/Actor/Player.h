@@ -21,10 +21,13 @@ protected:
 	virtual void Draw() override;
 
 public:
-	int GetPaperCount();
+	inline int GetPaperCount() { return paperCount; }
 
 private:
 	PaperLevel* owner;
 	int paperCount = 0;
+
+	float moveTimer = 0.0f;
+	float moveInterval = 0.15f;
 
 };

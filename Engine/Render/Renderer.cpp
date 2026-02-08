@@ -1,6 +1,7 @@
 #include "Renderer.h"
 #include "ScreenBuffer.h"
 #include "Util/Util.h"
+#include <string>
 
 namespace Wanted
 {
@@ -92,7 +93,7 @@ namespace Wanted
 		for (const RenderCommand& command : renderQueue)
 		{
 			// 화면에 그릴 텍스트가 없으면 건너뜀.
-			if (!command.text)
+			if (command.text.empty())
 			{
 				continue;
 			}
@@ -105,7 +106,7 @@ namespace Wanted
 			}
 
 			// 화면에 그릴 문자열 길이.
-			const int length = static_cast<int>(strlen(command.text));
+			const int length = static_cast<int>(command.text.size());
 
 			// 안그려도 되면 건너뜀.
 			if (length <= 0)
@@ -184,6 +185,7 @@ namespace Wanted
 		return *instance;
 	}
 
+
 	void Renderer::Clear()
 	{
 		// 화면 지우기.
@@ -202,7 +204,7 @@ namespace Wanted
 	{
 		// 렌더 데이터 생성 후 큐에 추가.
 		RenderCommand command = {};
-		command.text = text;
+		command.text = std::string(text);
 		command.position = position;
 		command.color = color;
 		command.sortingOrder = sortingOrder;

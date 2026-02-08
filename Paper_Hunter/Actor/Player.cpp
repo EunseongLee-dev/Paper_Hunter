@@ -24,11 +24,20 @@ void Player::Tick(float deltaTime)
 {
 	super::Tick(deltaTime);
 
+	// 플레이어 이동속도 조절
+	moveTimer += deltaTime;
+
+	if (moveTimer < moveInterval)
+	{
+		return;
+	}
+
+	moveTimer = 0.0f;
 
 	// Todo: ESC키 처리(Player)
 
 	// Q키 종료
-	if (Input::Get().GetKeyDown('Q'))
+	if (Input::Get().GetKey('Q'))
 	{
 		Engine::Get().QuitEngine();
 	}
@@ -36,7 +45,7 @@ void Player::Tick(float deltaTime)
 	// Todo: 박스 생성(player) 필요여부 고민중
 
 	// 이동
-	if (Input::Get().GetKeyDown(VK_RIGHT) && GetPosition().x < 20)
+	if (Input::Get().GetKey(VK_RIGHT))
 	{
 		// 이동 가능 여부 판단
 		Vector2 newPosition(GetPosition().x + 1, GetPosition().y);
@@ -51,7 +60,7 @@ void Player::Tick(float deltaTime)
 			}
 		}
 	}
-	if (Input::Get().GetKeyDown(VK_LEFT) && GetPosition().x > 0)
+	if (Input::Get().GetKey(VK_LEFT))
 	{
 		// 이동 가능 여부 판단
 		Vector2 newPosition(GetPosition().x - 1, GetPosition().y);
@@ -67,7 +76,7 @@ void Player::Tick(float deltaTime)
 		}
 	}
 
-	if (Input::Get().GetKeyDown(VK_DOWN) && GetPosition().y < 15)
+	if (Input::Get().GetKey(VK_DOWN))
 	{
 		// 이동 가능 여부 판단
 		Vector2 newPosition(GetPosition().x, GetPosition().y + 1);
@@ -83,7 +92,7 @@ void Player::Tick(float deltaTime)
 		}
 	}
 
-	if (Input::Get().GetKeyDown(VK_UP) && GetPosition().y > 0)
+	if (Input::Get().GetKey(VK_UP))
 	{
 		// 이동 가능 여부 판단
 		Vector2 newPosition(GetPosition().x, GetPosition().y - 1);
@@ -104,9 +113,4 @@ void Player::Tick(float deltaTime)
 void Player::Draw()
 {
 	Actor::Draw();
-}
-
-int Player::GetPaperCount()
-{
-	return paperCount;
 }
