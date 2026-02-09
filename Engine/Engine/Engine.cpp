@@ -275,10 +275,10 @@ namespace Wanted
 
 		mainLevel->Tick(deltaTime);
 
-		Vector2 target = mainLevel->GetCameraTarget();
-		
-		cameraPosition.x = target.x - setting.width / 2;
-		cameraPosition.y = target.y - setting.height / 2;
+		//Vector2 target = mainLevel->GetCameraTarget();
+		//
+		//cameraPosition.x = target.x - setting.width / 2;
+		//cameraPosition.y = target.y - setting.height / 2;
 	}
 
 	void Engine::Draw()

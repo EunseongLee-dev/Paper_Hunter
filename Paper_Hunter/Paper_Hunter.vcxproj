@@ -90,19 +90,23 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Actor\Goal.cpp" />
     <ClCompile Include="Actor\Ground.cpp" />
     <ClCompile Include="Actor\Paper.cpp" />
     <ClCompile Include="Actor\Player.cpp" />
     <ClCompile Include="Actor\Wall.cpp" />
     <ClCompile Include="Level\PaperLevel.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Manager\GameFlowManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Actor\Goal.h" />
     <ClInclude Include="Actor\Ground.h" />
     <ClInclude Include="Actor\Paper.h" />
     <ClInclude Include="Actor\Player.h" />
     <ClInclude Include="Actor\Wall.h" />
     <ClInclude Include="Level\PaperLevel.h" />
+    <ClInclude Include="Manager\GameFlowManager.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

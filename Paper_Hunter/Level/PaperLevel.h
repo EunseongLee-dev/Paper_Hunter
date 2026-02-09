@@ -1,16 +1,21 @@
 #pragma once
 
 #include "Level/Level.h"
+#include "Math/Color.h"
+
+#include <string>
 
 using namespace Wanted;
 
 class Player;
+class Goal;
 
 enum class MoveResult
 {
 	Blocked,
 	Moved,
-	GotPaper
+	GotPaper,
+	ReachedGoal
 };
 
 class PaperLevel : public Level
@@ -35,7 +40,7 @@ private:
 	bool IsVisible(const Vector2& pos) const;
 
 	// UI 출력 함수
-	void DrawUI(const Vector2& startPos, const char* text);
+	void DrawUI(const Vector2& startPos, const char* text, Color color = Color::White);
 
 	virtual void Tick(float deltaTime) override;
 
@@ -55,11 +60,22 @@ public:
 	// 페이퍼 갯수 반환 함수
 	inline int GetTotalPaperCount() const { return totalPaperCount; }
 
+	// 플레이어 GOAL 도달 판정 함수
+	void HandleGoalReached(Player* player);
+
+	// 메세지 출력 헬퍼 함수
+	void DisplayMessage(const std::string& message, float duration = 2.0f);
+
+	// 페이터 수집 상태 확인
+	void CheckPaperCollectionStatus(Player* player);
+
 private:
 	int mapWidth;
 	int mapHeight;
 
 	Player* player = nullptr;
+
+	Goal* goal = nullptr;
 
 	// 시야 반경
 	int viewRadius = 5;
@@ -69,5 +85,16 @@ private:
 
 	// 플레이 타임
 	float playTime = 0.0f;
+
+	// 클리어 조건 미충족 메세지 출력
+	std::string currentMessage;
+	float messageDisplayTime = 0.0f;
+
+	// 클리어 조건 타이머 변수
+	bool timerStarted = false;
+	float remainingTime = 0.0f;
+	float timeLimit = 30.0f;
+
+
 };
 

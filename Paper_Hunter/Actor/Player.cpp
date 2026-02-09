@@ -11,7 +11,7 @@ Player::Player(const Vector2& position, PaperLevel* level)
 	:super("P", position, Color::Red), owner(level)
 {
 	// 그리기 우선순위
-	sortingOrder = 10;
+	sortingOrder = 250;
 }
 
 
@@ -42,8 +42,6 @@ void Player::Tick(float deltaTime)
 		Engine::Get().QuitEngine();
 	}
 
-	// Todo: 박스 생성(player) 필요여부 고민중
-
 	// 이동
 	if (Input::Get().GetKey(VK_RIGHT))
 	{
@@ -57,6 +55,12 @@ void Player::Tick(float deltaTime)
 			if (result == MoveResult::GotPaper)
 			{
 				++paperCount;
+				owner->CheckPaperCollectionStatus(this);
+			}
+
+			else if (result == MoveResult::ReachedGoal)
+			{
+				owner->HandleGoalReached(this);
 			}
 		}
 	}
@@ -72,6 +76,12 @@ void Player::Tick(float deltaTime)
 			if (result == MoveResult::GotPaper)
 			{
 				++paperCount;
+				owner->CheckPaperCollectionStatus(this);
+			}
+
+			else if (result == MoveResult::ReachedGoal)
+			{
+				owner->HandleGoalReached(this);
 			}
 		}
 	}
@@ -88,6 +98,12 @@ void Player::Tick(float deltaTime)
 			if (result == MoveResult::GotPaper)
 			{
 				++paperCount;
+				owner->CheckPaperCollectionStatus(this);
+			}
+
+			else if (result == MoveResult::ReachedGoal)
+			{
+				owner->HandleGoalReached(this);
 			}
 		}
 	}
@@ -104,11 +120,16 @@ void Player::Tick(float deltaTime)
 			if (result == MoveResult::GotPaper)
 			{
 				++paperCount;
+				owner->CheckPaperCollectionStatus(this);
+			}
+
+			else if (result == MoveResult::ReachedGoal)
+			{
+				owner->HandleGoalReached(this);
 			}
 		}
 	}
 }
-
 
 void Player::Draw()
 {

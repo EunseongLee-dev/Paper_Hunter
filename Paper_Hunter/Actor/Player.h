@@ -28,6 +28,6 @@ private:
 	int paperCount = 0;
 
 	float moveTimer = 0.0f;
-	float moveInterval = 0.15f;
+	float moveInterval = 0.10f;
 
 };

@@ -205,7 +205,7 @@ namespace Wanted
 		// 렌더 데이터 생성 후 큐에 추가.
 		RenderCommand command = {};
 		command.text = std::string(text);
-		command.position = position;
+		command.position = position - worldOffset;
 		command.color = color;
 		command.sortingOrder = sortingOrder;
 

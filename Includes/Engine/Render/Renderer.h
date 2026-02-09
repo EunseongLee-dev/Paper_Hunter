@@ -54,6 +54,13 @@ namespace Wanted
 		// 그리기 함수.
 		void Draw();
 
+		// 월드 좌표 함수
+		inline void SetWorldOffset(const Vector2& offset) { worldOffset = offset; }
+
+		inline Vector2 GetWorldOffset() const { return worldOffset; }
+
+		inline Vector2 GetScreenSize() const { return screenSize; }
+
 		// 그리는데 필요한 데이터를 제출(적재)하는 함수.
 		void Submit(
 			const char* text,
@@ -98,5 +105,8 @@ namespace Wanted
 
 		// 싱글톤 구현을 위한 정적 변수.
 		static Renderer* instance;
+
+		// 월드 좌표
+		Vector2 worldOffset = Vector2(0, 0);
 	};
 }

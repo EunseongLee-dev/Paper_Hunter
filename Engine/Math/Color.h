@@ -13,6 +13,7 @@ namespace Wanted
 		Blue = FOREGROUND_BLUE,
 		Green = FOREGROUND_GREEN,
 		Red = FOREGROUND_RED,
+		Y = Blue | Green,
 		White = Blue | Green | Red,
 	};
 }
