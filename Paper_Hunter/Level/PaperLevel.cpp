@@ -6,17 +6,27 @@
 #include "Actor/Paper.h"
 #include "Actor/Goal.h"
 #include "Util/Util.h"
-#include "Actor/Player.h"
+#include "Manager/GameFlowManager.h"
 #include "Render/Renderer.h"
 #include "Core/Input.h"
 
+
 #include <iostream>
-#include "GameFlowManager.h"
 
 
 PaperLevel::PaperLevel()
 {
+	//Manager 객체 생성
+	gamemanager = new GameFlowManager(this);
 	LoadMap("PaperMap.txt");
+
+	// 초기 게임 상태 설정(MainMenu)
+	gamemanager->SetGameState(GameState::MainMenu);
+}
+
+PaperLevel::~PaperLevel()
+{
+	SafeDelete(gamemanager);
 }
 
 Vector2 PaperLevel::GetRenderSize() const
@@ -31,7 +41,7 @@ void PaperLevel::LoadMap(const char* filename)
 
 	// 파일 로드
 	char path[2048] = {};
-	sprintf_s(path, "../Assets/%s", filename);
+	sprintf_s(path, "../../../../Assets/%s", filename);
 
 	// 파일 열기
 	FILE* file = nullptr;
@@ -211,40 +221,60 @@ Vector2 PaperLevel::GetCameraTarget() const
 
 void PaperLevel::HandleGoalReached(Player* player)
 {
-
-	// 플레이어가 모은 페이퍼 개수 확인
-	int collectedPapers = player->GetPaperCount();
-
 	// 총 페이퍼 개수와 비교
 	if (player->GetPaperCount() < totalPaperCount)
 	{
-		std::string msg = "페이퍼를 " + std::to_string(totalPaperCount - collectedPapers)
-			+ "개 더 모아야 합니다!";
-		DisplayMessage(msg, 2.0f);
+		char buffer[64];
+		sprintf_s(buffer, "Collect %d more paper(s)!", totalPaperCount - player->GetPaperCount());
+		gamemanager->DisplayMessage(buffer, 2.0f);
 	}
-	else if(timerStarted)
+	else
 	{
-		DisplayMessage("게임 클리어!", 5.0f);
-		timerStarted = false;
+		// 타이머 작동 중
+		gamemanager->TriggerGameClear();
 	}
+
+	//Todo: 삭제 예정
+	//// 플레이어가 모은 페이퍼 개수 확인
+	//int collectedPapers = player->GetPaperCount();
+
+	//
+	//if (player->GetPaperCount() < totalPaperCount)
+	//{
+
+	//	DisplayMessage(msg, 2.0f);
+	//}
+	//else if(timerStarted)
+	//{
+	//	DisplayMessage("게임 클리어!", 5.0f);
+	//	timerStarted = false;
+	//}
 }
 
-
-void PaperLevel::DisplayMessage(const std::string& message, float duration)
-{
-	currentMessage = message;
-	messageDisplayTime = duration;
-}
+//Todo: 삭제예정
+//void PaperLevel::DisplayMessage(const std::string& message, float duration)
+//{
+//	currentMessage = message;
+//	messageDisplayTime = duration;
+//}
 
 void PaperLevel::CheckPaperCollectionStatus(Player* player)
 {
 	// 타이머 시작 전 페이퍼 수집 완료 시
 	if (!timerStarted && player->GetPaperCount() >= 1)
 	{
-		DisplayMessage("제한 시간 안에 Goal로 돌아오세요!", 5.0f);
+		gamemanager->DisplayMessage("All papers collected!\nReturn to the Goal!", 2.5f);
 		timerStarted = true;
 		remainingTime = timeLimit;
 	}
+
+	//Todo: 삭제예정
+	//if (!timerStarted && player->GetPaperCount() >= 1)
+	//{
+	//	DisplayMessage();
+	//	timerStarted = true;
+	//	remainingTime = timeLimit;
+	//}
 }
 
 bool PaperLevel::IsVisible(const Vector2& pos) const
@@ -269,114 +299,191 @@ void PaperLevel::DrawUI(const Vector2& startPos, const char* text, Color color)
 		return;
 	}
 
-	Vector2 pos = startPos;
+	Vector2 worldPosForscreenUI = startPos + Renderer::Get().GetWorldOffset();
 
-	for (int i = 0; text[i] != '\0'; ++i)
+	Renderer::Get().Submit(text, worldPosForscreenUI, color, 999);
+
+	//Vector2 pos = startPos;
+
+	//for (int i = 0; text[i] != '\0'; ++i)
+	//{
+	//	char ch[2] = { text[i], '\0' };
+
+	//Todo: 삭제예정
+	//	Renderer::Get().Submit(ch, pos + Renderer::Get().GetWorldOffset(),
+	//		color, 100);
+
+	//	pos.x += 1;
+	//}
+}
+
+void PaperLevel::ResetLevel()
+{
+	// 레벨 상태 초기화
+	// 모든 액터 파괴 및 다시 로드
+	for (Actor* actor : actors)
 	{
-		char ch[2] = { text[i], '\0' };
-
-		Renderer::Get().Submit(ch, pos + Renderer::Get().GetWorldOffset(),
-			color, 100);
-
-		pos.x += 1;
-
+		actor->Destroy();
 	}
+	actors.clear();
+	player = nullptr;
+	goal = nullptr;
+
+	// 초기화 변수
+
+	totalPaperCount = 0;
+	playTime = 0.0f;
+	timerStarted = false;
+	remainingTime = 0.0f;
+	
+	//Todo: optionIndex는 매니저에서 수정
+	
+	LoadMap("PaperMap.txt");
+	gamemanager->SetGameState(GameState::Playing);
+	gamemanager->DisplayMessage("Game Start!", 1.5f);
 }
 
 void PaperLevel::Tick(float deltaTime)
 {	
+	// 입력 처리
+	gamemanager->HandleInput();
 
-	if (currentGameState == GameState::Playing)
+	// 게임 상태 판별
+	gamemanager->Tick(deltaTime);
+
+	if (gamemanager->GetCurrentGameState() == GameState::Playing)
 	{
 		Level::Tick(deltaTime);
 
-		// 메시지 타이머 업데이트 
-		if (messageDisplayTime > 0.0f)
+		// 타이머
+		if (gamemanager->GetCurrentGameState() == GameState::Playing)
 		{
-			messageDisplayTime -= deltaTime;
-			if (messageDisplayTime <= 0.0f)
+			if (timerStarted)
 			{
-				currentMessage.clear();
+				remainingTime -= deltaTime;
+				if (remainingTime < 0.0f)
+				{
+					remainingTime = 0.0f;
+					// 시간 초과 시 게임 오버
+					gamemanager->TriggerGameOver();
+				}
 			}
+			playTime += deltaTime;
 		}
-
-		// 클리어 타이머 업데이트
-		if (timerStarted)
-		{
-			remainingTime -= deltaTime;
-			// 남은 시간이 0 이하가 되면 0 고정
-			if (remainingTime < 0.0f)
-			{
-				remainingTime = 0.0f;
-			}
-		}
-
-		// 게임 오버 조건 추가
-		if (timerStarted && remainingTime <= 0.0f)
-		{
-			// 타이머가 0이 되면 게임 오버 처리
-			DisplayMessage("시간 초과! 게임 오버!", 3.0f);
-
-			// 타이머 작동 중지
-			timerStarted = false;
-		}
-		playTime += deltaTime;
 	}
+	//Todo: 삭제예정
+	//if (currentGameState == GameState::Playing)
+	//{
+	//	Level::Tick(deltaTime);
+
+	//	// 메시지 타이머 업데이트 
+	//	if (messageDisplayTime > 0.0f)
+	//	{
+	//		messageDisplayTime -= deltaTime;
+	//		if (messageDisplayTime <= 0.0f)
+	//		{
+	//			currentMessage.clear();
+	//		}
+	//	}
+
+	//	// 클리어 타이머 업데이트
+	//	if (timerStarted)
+	//	{
+	//		remainingTime -= deltaTime;
+	//		// 남은 시간이 0 이하가 되면 0 고정
+	//		if (remainingTime < 0.0f)
+	//		{
+	//			remainingTime = 0.0f;
+	//		}
+	//	}
+
+	//	// 게임 오버 조건 추가
+	//	if (timerStarted && remainingTime <= 0.0f)
+	//	{
+	//		// 타이머가 0이 되면 게임 오버 처리
+	//		DisplayMessage("시간 초과! 게임 오버!", 3.0f);
+
+	//		// 타이머 작동 중지
+	//		timerStarted = false;
+	//	}
+	//	playTime += deltaTime;
+	//}
 }
 
 void PaperLevel::Draw()
 {
-	// 카메라 위치 설정
-	Vector2 cameraPos = GetCameraTarget();
-	Vector2 screenSize = Renderer::Get().GetScreenSize();
-
-	Vector2 halfScreenSize = Vector2(screenSize.x / 2, screenSize.y / 2);
-
-	Vector2 cameraTopLeft = cameraPos - halfScreenSize;
-	Renderer::Get().SetWorldOffset(cameraTopLeft);
-
-	for (Actor* actor : actors)
+	// Playing 상태일 때
+	if (gamemanager->GetCurrentGameState() == GameState::Playing)
 	{
-		if (IsVisible(actor->GetPosition()))
+		// 카메라 위치 설정
+		Vector2 cameraPos = GetCameraTarget();
+		Vector2 screenSize = Renderer::Get().GetScreenSize();
+
+		Vector2 halfScreenSize = Vector2(screenSize.x / 2, screenSize.y / 2);
+
+		Vector2 cameraTopLeft = cameraPos - halfScreenSize;
+		Renderer::Get().SetWorldOffset(cameraTopLeft);
+
+		for (Actor* actor : actors)
 		{
-			actor->Draw();
+			if (IsVisible(actor->GetPosition()))
+			{
+				actor->Draw();
+			}
+		}
+
+		// STATUS UI
+		char buffer[64];
+
+		sprintf_s(buffer, "===== STATUS =====");
+		DrawUI(Vector2(0, 0), buffer);
+
+		// Paper 출력
+		sprintf_s(buffer, "   Paper: %d / %d", player->GetPaperCount(), PaperLevel::GetTotalPaperCount());
+		DrawUI(Vector2(0, 1), buffer);
+
+		// Time 출력
+		sprintf_s(buffer, "   Time:  %.1f", playTime);
+		DrawUI(Vector2(0, 2), buffer);
+
+		sprintf_s(buffer, "==================");
+		DrawUI(Vector2(0, 3), buffer);
+
+		if (timerStarted)
+		{
+			// 기본 UI 아래쪽에 출력
+			// 남은 시간, 소수점 첫째 자리까지 표시
+			sprintf_s(buffer, "   Time Left: %.1f", remainingTime);
+			DrawUI(Vector2(0, 4), buffer, Color::Red);
 		}
 	}
+	gamemanager->Draw();
+	//Todo: 아직확인안됨
 
-	char buffer[64];
 
-	sprintf_s(buffer, "===== STATUS =====");
-	DrawUI(Vector2(0, 0), buffer);
+	//Todo: 삭제예정
+	//for (Actor* actor : actors)
+	//{
+	//	if (IsVisible(actor->GetPosition()))
+	//	{
+	//		actor->Draw();
+	//	}
+	//}
 
-	// Paper 출력
-	sprintf_s(buffer, "   Paper: %d / %d", player->GetPaperCount(), PaperLevel::GetTotalPaperCount());
-	DrawUI(Vector2(0, 1), buffer);
+	//Todo: 삭제예정
+	//if (!currentMessage.empty() && messageDisplayTime > 0.0f)
+	//{
+	//	// 메시지는 화면 중앙 하단에 표시
+	//	Vector2 consoleScreenSize = Renderer::Get().GetScreenSize();
+	//	DrawUI(Vector2((consoleScreenSize.x / 2) - (currentMessage.length() / 2),
+	//		consoleScreenSize.y - 2), currentMessage.c_str(), Color::Red);
+	//}
 
-	// Time 출력
-	sprintf_s(buffer, "   Time:  %.1f", playTime);
-	DrawUI(Vector2(0, 2), buffer);
+	//if (timerStarted)
+	//{
+	//	char buffer[64];
+	//	
 
-	sprintf_s(buffer, "==================");
-	DrawUI(Vector2(0, 3), buffer);
-
-	if (!currentMessage.empty() && messageDisplayTime > 0.0f)
-	{
-		// 메시지는 화면 중앙 하단에 표시
-		Vector2 consoleScreenSize = Renderer::Get().GetScreenSize();
-		DrawUI(Vector2((consoleScreenSize.x / 2) - (currentMessage.length() / 2),
-			consoleScreenSize.y - 2), currentMessage.c_str(), Color::Red);
-	}
-
-	if (timerStarted)
-	{
-		char buffer[64];
-		
-		// 남은 시간, 소수점 첫째 자리까지 표시
-		sprintf_s(buffer, "   Time Left: %.1f", remainingTime);
-		
-		// 기본 UI 아래쪽에 출력
-		DrawUI(Vector2(0, 4), buffer, Color::Red);
-	}
 }
 
 

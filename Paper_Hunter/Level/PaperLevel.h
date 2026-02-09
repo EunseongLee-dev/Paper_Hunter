@@ -2,6 +2,7 @@
 
 #include "Level/Level.h"
 #include "Math/Color.h"
+#include "Manager/GameFlowManager.h"
 
 #include <string>
 
@@ -24,6 +25,7 @@ class PaperLevel : public Level
 
 public:
 	PaperLevel();
+	~PaperLevel();
 
 	inline int GetMapWidth() { return mapWidth; }
 
@@ -39,12 +41,15 @@ private:
 	// 플레이어 시야 제한 함수
 	bool IsVisible(const Vector2& pos) const;
 
-	// UI 출력 함수
-	void DrawUI(const Vector2& startPos, const char* text, Color color = Color::White);
-
 	virtual void Tick(float deltaTime) override;
 
 	virtual void Draw() override;
+
+public:
+	// UI 출력 함수
+	void DrawUI(const Vector2& startPos, const char* text, Color color = Color::White);
+
+	void ResetLevel();
 	
 
 public:
@@ -63,9 +68,6 @@ public:
 	// 플레이어 GOAL 도달 판정 함수
 	void HandleGoalReached(Player* player);
 
-	// 메세지 출력 헬퍼 함수
-	void DisplayMessage(const std::string& message, float duration = 2.0f);
-
 	// 페이터 수집 상태 확인
 	void CheckPaperCollectionStatus(Player* player);
 
@@ -77,6 +79,8 @@ private:
 
 	Goal* goal = nullptr;
 
+	GameFlowManager* gamemanager = nullptr;
+
 	// 시야 반경
 	int viewRadius = 5;
 
@@ -86,9 +90,10 @@ private:
 	// 플레이 타임
 	float playTime = 0.0f;
 
-	// 클리어 조건 미충족 메세지 출력
-	std::string currentMessage;
-	float messageDisplayTime = 0.0f;
+	//Todo: 삭제 예정
+	//// 클리어 조건 미충족 메세지 출력
+	//std::string currentMessage;
+	//float messageDisplayTime = 0.0f;
 
 	// 클리어 조건 타이머 변수
 	bool timerStarted = false;
