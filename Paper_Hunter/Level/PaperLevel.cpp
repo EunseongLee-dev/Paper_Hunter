@@ -68,8 +68,8 @@ void PaperLevel::LoadMap(const char* filename)
 
 	// 파일 로드
 	char path[2048] = {};
-	//sprintf_s(path, "../../../../Assets/%s", filename);
-	sprintf_s(path, "../Assets/%s", filename);
+	sprintf_s(path, "../../../../Assets/%s", filename);
+	//sprintf_s(path, "../Assets/%s", filename);
 
 	// 파일 열기
 	FILE* file = nullptr;
@@ -162,7 +162,7 @@ void PaperLevel::LoadMap(const char* filename)
 		++position.x;
 
 		//Todo: 시연용 페이퍼 갯수 변경위치(완료시 삭제)
-		totalPaperCount = 3;
+		/*totalPaperCount = 3;*/
 	}
 	mapHeight = position.y + 1;
 

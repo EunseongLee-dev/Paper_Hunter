@@ -273,7 +273,8 @@ void GameFlowManager::LoadAsciiArt(const char* filename,
 	*artsize = Vector2::Zero;
 
 	char path[2048] = {};
-	sprintf_s(path, "../Assets/%s", filename);
+	sprintf_s(path, "../../../../Assets/%s", filename);
+	//sprintf_s(path, "../Assets/%s", filename);
 
 	std::ifstream file(path);
 	if (!file.is_open())

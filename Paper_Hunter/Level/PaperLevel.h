@@ -99,7 +99,7 @@ private:
 	// 클리어 조건 타이머 변수
 	bool timerStarted = false;
 	float remainingTime = 0.0f;
-	float timeLimit = 180.0f;
+	float timeLimit = 90.0f;
 
 	// 페이퍼 HUD 변수
 	float paperBlinkTimer = 0.0f;
