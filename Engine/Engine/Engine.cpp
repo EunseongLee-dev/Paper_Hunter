@@ -196,7 +196,8 @@ namespace Wanted
 	{
 		// 엔진 설정 파일 열기.
 		FILE* file = nullptr;
-		fopen_s(&file, "../../../../Config/Setting.txt", "rt");
+		/*fopen_s(&file, "../../../../Config/Setting.txt", "rt");*/
+		fopen_s(&file, "../Config/Setting.txt", "rt");
 
 		// 예외처리.
 		if (!file)

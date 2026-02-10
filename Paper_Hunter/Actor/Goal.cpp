@@ -3,7 +3,7 @@
 #include "Actor/Actor.h"
 
 Goal::Goal(const Vector2& pos)
-	:super("GOAL", pos, Color::Blue)
+	:super("GOAL", pos, Color::LightRed)
 {
 }
 
@@ -11,5 +11,5 @@ void Goal::Draw()
 {
 		Vector2 drawPosition = position;
 	drawPosition.x -= (width / 2);
-	Renderer::Get().Submit("GOAL", drawPosition, Color::Blue, 200);
+	Renderer::Get().Submit("GOAL", drawPosition, Color::LightBlue, 200);
 }

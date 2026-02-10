@@ -8,7 +8,7 @@
 #include <Windows.h>
 
 Player::Player(const Vector2& position, PaperLevel* level)
-	:super("P", position, Color::Red), owner(level)
+	:super("O", position, Color::BrightYellow), owner(level)
 {
 	// 그리기 우선순위
 	sortingOrder = 250;
@@ -33,8 +33,6 @@ void Player::Tick(float deltaTime)
 	}
 
 	moveTimer = 0.0f;
-
-	// Todo: ESC키 처리(Player)
 
 	// Q키 종료
 	if (Input::Get().GetKey('Q'))

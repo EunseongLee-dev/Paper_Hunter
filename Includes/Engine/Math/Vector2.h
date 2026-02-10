@@ -15,6 +15,8 @@ namespace Wanted
 		// 문자열로 변환해서 반환하는 함수.
 		const char* ToString();
 
+		inline float LengthSq() const { return (x * x + y * y); }
+
 		// 연산자 오버로딩.
 		Vector2 operator+(const Vector2& other) const;
 		Vector2 operator-(const Vector2& other) const;

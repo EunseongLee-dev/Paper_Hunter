@@ -34,6 +34,33 @@ Vector2 PaperLevel::GetRenderSize() const
 	return Vector2(mapWidth, mapHeight);
 }
 
+Vector2 PaperLevel::GetNearestPaperPosition(const Vector2& playerPosition) const
+{
+	// 최단 거리 저장
+	float minDistanceSq = -1.0f;
+	// 가까운 페이퍼 위치
+	Vector2 nearestPaperPos = Vector2::Zero;
+
+	for (Actor* actor : actors)
+	{
+		// 현재 액터가 페이퍼 인지 확인
+		Paper* paper = dynamic_cast<Paper*>(actor);
+		if (paper)
+		{
+			float distSq = (paper->GetPosition() - playerPosition).LengthSq();
+			
+			// 첫 번째 페이퍼 or 더 가까운 페이퍼를 찾았다면 업데이트
+			if (minDistanceSq < 0 || distSq < minDistanceSq)
+			{
+				minDistanceSq = distSq;
+				nearestPaperPos = paper->GetPosition();
+			}
+		}
+	}
+	// 가장 가까운 페이퍼의 위치 반환
+	return nearestPaperPos;
+}
+
 void PaperLevel::LoadMap(const char* filename)
 {
 	mapWidth = 0;
@@ -41,7 +68,8 @@ void PaperLevel::LoadMap(const char* filename)
 
 	// 파일 로드
 	char path[2048] = {};
-	sprintf_s(path, "../../../../Assets/%s", filename);
+	//sprintf_s(path, "../../../../Assets/%s", filename);
+	sprintf_s(path, "../Assets/%s", filename);
 
 	// 파일 열기
 	FILE* file = nullptr;
@@ -132,6 +160,9 @@ void PaperLevel::LoadMap(const char* filename)
 		}
 		// x좌표 증가 처리
 		++position.x;
+
+		//Todo: 시연용 페이퍼 갯수 변경위치(완료시 삭제)
+		totalPaperCount = 3;
 	}
 	mapHeight = position.y + 1;
 
@@ -166,7 +197,6 @@ bool PaperLevel::CanMove(const Vector2& playerPosition, const Vector2& nextPosit
 	{
 		return false;
 	}
-
 	return true;
 }
 
@@ -231,50 +261,23 @@ void PaperLevel::HandleGoalReached(Player* player)
 	else
 	{
 		// 타이머 작동 중
-		gamemanager->TriggerGameClear();
+		gamemanager->TriggerGameClear(playTime);
 	}
-
-	//Todo: 삭제 예정
-	//// 플레이어가 모은 페이퍼 개수 확인
-	//int collectedPapers = player->GetPaperCount();
-
-	//
-	//if (player->GetPaperCount() < totalPaperCount)
-	//{
-
-	//	DisplayMessage(msg, 2.0f);
-	//}
-	//else if(timerStarted)
-	//{
-	//	DisplayMessage("게임 클리어!", 5.0f);
-	//	timerStarted = false;
-	//}
 }
-
-//Todo: 삭제예정
-//void PaperLevel::DisplayMessage(const std::string& message, float duration)
-//{
-//	currentMessage = message;
-//	messageDisplayTime = duration;
-//}
 
 void PaperLevel::CheckPaperCollectionStatus(Player* player)
 {
 	// 타이머 시작 전 페이퍼 수집 완료 시
-	if (!timerStarted && player->GetPaperCount() >= 1)
+	if (!timerStarted && player->GetPaperCount() >= totalPaperCount)
 	{
-		gamemanager->DisplayMessage("All papers collected!\nReturn to the Goal!", 2.5f);
+		float messageDuration = 3.0f;
+		gamemanager->DisplayMessage("All papers collected!\nReturn to the Goal!", messageDuration);
 		timerStarted = true;
 		remainingTime = timeLimit;
-	}
 
-	//Todo: 삭제예정
-	//if (!timerStarted && player->GetPaperCount() >= 1)
-	//{
-	//	DisplayMessage();
-	//	timerStarted = true;
-	//	remainingTime = timeLimit;
-	//}
+		// 페이퍼 HUD 설정
+		paperBlinkTimer = messageDuration;
+	}
 }
 
 bool PaperLevel::IsVisible(const Vector2& pos) const
@@ -302,19 +305,6 @@ void PaperLevel::DrawUI(const Vector2& startPos, const char* text, Color color)
 	Vector2 worldPosForscreenUI = startPos + Renderer::Get().GetWorldOffset();
 
 	Renderer::Get().Submit(text, worldPosForscreenUI, color, 999);
-
-	//Vector2 pos = startPos;
-
-	//for (int i = 0; text[i] != '\0'; ++i)
-	//{
-	//	char ch[2] = { text[i], '\0' };
-
-	//Todo: 삭제예정
-	//	Renderer::Get().Submit(ch, pos + Renderer::Get().GetWorldOffset(),
-	//		color, 100);
-
-	//	pos.x += 1;
-	//}
 }
 
 void PaperLevel::ResetLevel()
@@ -336,11 +326,9 @@ void PaperLevel::ResetLevel()
 	timerStarted = false;
 	remainingTime = 0.0f;
 	
-	//Todo: optionIndex는 매니저에서 수정
-	
 	LoadMap("PaperMap.txt");
 	gamemanager->SetGameState(GameState::Playing);
-	gamemanager->DisplayMessage("Game Start!", 1.5f);
+	gamemanager->DisplayMessage("Game Start!", 1.0f);
 }
 
 void PaperLevel::Tick(float deltaTime)
@@ -355,9 +343,19 @@ void PaperLevel::Tick(float deltaTime)
 	{
 		Level::Tick(deltaTime);
 
-		// 타이머
+		// HUD 타이머
 		if (gamemanager->GetCurrentGameState() == GameState::Playing)
 		{
+			if (paperBlinkTimer > 0.0f)
+			{
+				paperBlinkTimer -= deltaTime;
+				if (paperBlinkTimer <= 0.0f)
+				{
+					paperBlinkTimer = 0.0f;
+				}
+			}
+
+			// 클리어 타이머
 			if (timerStarted)
 			{
 				remainingTime -= deltaTime;
@@ -371,43 +369,6 @@ void PaperLevel::Tick(float deltaTime)
 			playTime += deltaTime;
 		}
 	}
-	//Todo: 삭제예정
-	//if (currentGameState == GameState::Playing)
-	//{
-	//	Level::Tick(deltaTime);
-
-	//	// 메시지 타이머 업데이트 
-	//	if (messageDisplayTime > 0.0f)
-	//	{
-	//		messageDisplayTime -= deltaTime;
-	//		if (messageDisplayTime <= 0.0f)
-	//		{
-	//			currentMessage.clear();
-	//		}
-	//	}
-
-	//	// 클리어 타이머 업데이트
-	//	if (timerStarted)
-	//	{
-	//		remainingTime -= deltaTime;
-	//		// 남은 시간이 0 이하가 되면 0 고정
-	//		if (remainingTime < 0.0f)
-	//		{
-	//			remainingTime = 0.0f;
-	//		}
-	//	}
-
-	//	// 게임 오버 조건 추가
-	//	if (timerStarted && remainingTime <= 0.0f)
-	//	{
-	//		// 타이머가 0이 되면 게임 오버 처리
-	//		DisplayMessage("시간 초과! 게임 오버!", 3.0f);
-
-	//		// 타이머 작동 중지
-	//		timerStarted = false;
-	//	}
-	//	playTime += deltaTime;
-	//}
 }
 
 void PaperLevel::Draw()
@@ -432,58 +393,99 @@ void PaperLevel::Draw()
 			}
 		}
 
+		// Paper HUD
+		// 색상 변경 및 깜빡임
+		Color paperHudColor = Color::Cyan;
+		if (player)
+		{
+			// 모든 페이퍼 수집 시
+			if (player->GetPaperCount() >= totalPaperCount)
+			{
+				paperHudColor = Color::Green;
+			}
+
+			// 타이머 활성화 시 
+			if (paperBlinkTimer > 0.0f)
+			{
+				if (fmod(paperBlinkTimer, paperBlinkInterval * 2) < paperBlinkInterval)
+				{
+					paperHudColor = Color::Yellow;
+				}
+			}
+		}
+
 		// STATUS UI
 		char buffer[64];
 
 		sprintf_s(buffer, "===== STATUS =====");
 		DrawUI(Vector2(0, 0), buffer);
 
-		// Paper 출력
-		sprintf_s(buffer, "   Paper: %d / %d", player->GetPaperCount(), PaperLevel::GetTotalPaperCount());
-		DrawUI(Vector2(0, 1), buffer);
-
 		// Time 출력
 		sprintf_s(buffer, "   Time:  %.1f", playTime);
-		DrawUI(Vector2(0, 2), buffer);
+		DrawUI(Vector2(0, 1), buffer, Color::Cyan);
+		
+		// Paper 출력
+		sprintf_s(buffer, "   Paper: %d / %d", player->GetPaperCount(), PaperLevel::GetTotalPaperCount());
+		DrawUI(Vector2(0, 2), buffer, paperHudColor);
 
 		sprintf_s(buffer, "==================");
-		DrawUI(Vector2(0, 3), buffer);
+		DrawUI(Vector2(0, 4), buffer);
 
 		if (timerStarted)
 		{
 			// 기본 UI 아래쪽에 출력
 			// 남은 시간, 소수점 첫째 자리까지 표시
 			sprintf_s(buffer, "   Time Left: %.1f", remainingTime);
-			DrawUI(Vector2(0, 4), buffer, Color::Red);
+			DrawUI(Vector2(0, 3), buffer, Color::Red);
+		}
+	}
+
+	// 나침반 UI
+	// 모든 페이퍼를 모으지 않고, Playing 상태일 때만 표시
+	if (player && player->GetPaperCount() < totalPaperCount &&
+		gamemanager->GetCurrentGameState() == GameState::Playing)
+	{
+		Vector2 nearestPaperPos = GetNearestPaperPosition(player->GetPosition());
+
+		// 페이퍼 존재여부
+		if (nearestPaperPos != Vector2::Zero)
+		{
+			// 플레이어 기준 페이퍼의 방향
+			Vector2 direction = nearestPaperPos - player->GetPosition();
+
+			char compassArrow = ' ';
+			if (abs(direction.x) > abs(direction.y))
+			{
+				if (direction.x > 0)
+				{
+					compassArrow = '>';
+				}
+				else
+				{
+					compassArrow = '<';
+				}
+			}
+			else
+			{
+				if (direction.y > 0)
+				{
+					compassArrow = 'v';
+				}
+				else
+				{
+					compassArrow = '^';
+				}
+			}
+			if (compassArrow != ' ')
+			{
+				std::string compassText = "  Nearest Paper: ";
+				compassText += compassArrow;
+				// 나침반 출력 위치
+				DrawUI(Vector2(0, 3), compassText.c_str(), Color::BrightYellow);
+			}
 		}
 	}
 	gamemanager->Draw();
-	//Todo: 아직확인안됨
-
-
-	//Todo: 삭제예정
-	//for (Actor* actor : actors)
-	//{
-	//	if (IsVisible(actor->GetPosition()))
-	//	{
-	//		actor->Draw();
-	//	}
-	//}
-
-	//Todo: 삭제예정
-	//if (!currentMessage.empty() && messageDisplayTime > 0.0f)
-	//{
-	//	// 메시지는 화면 중앙 하단에 표시
-	//	Vector2 consoleScreenSize = Renderer::Get().GetScreenSize();
-	//	DrawUI(Vector2((consoleScreenSize.x / 2) - (currentMessage.length() / 2),
-	//		consoleScreenSize.y - 2), currentMessage.c_str(), Color::Red);
-	//}
-
-	//if (timerStarted)
-	//{
-	//	char buffer[64];
-	//	
-
 }
 
 

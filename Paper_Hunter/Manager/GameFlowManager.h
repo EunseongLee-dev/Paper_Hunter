@@ -43,34 +43,52 @@ public:
 
 	// Gmae Over/clear 상태 함수
 	void TriggerGameOver();
-	void TriggerGameClear();
-	//// 일시정지 메뉴
-	//inline const std::vector<std::string>& GetPauseMenuOptions() const { return pauseMenuOptions; }
-	//inline int OptionIndex() const { return optionIndex; }
-	//void SelectPauseOption(int index);
+	void TriggerGameClear(float currentPlayTime);
 
 	void QuitGame();
 
 private:
-	PaperLevel* ownerLevel;
+	// 메뉴 로드 함수 
+	void LoadAsciiArt(const char* filename, std::vector<std::string>* artVector,
+		Vector2* artsize);
 
+	// 메뉴 옵션 그리기 헬퍼 함수
+	void DrawMenuScreen(
+		const std::vector<std::string>& asciiArt,
+		const Vector2& artSize,
+		const std::vector<std::string>& options,
+		int optionIndex
+	);
+
+	// DrawUI 호출 헬퍼
+	void CallDrawUI(const Vector2& startPos, const char* text, Color color);
+
+private:
 	// 게임 시작 기본 옵션
+	PaperLevel* ownerLevel;
 	GameState currentGameState = GameState::MainMenu;
 
 	// 메시지 표시 
 	std::string currentMessage;
 	float messageDisplayTime = 0.0f;
 
-	// 일시정지 메뉴
-	std::vector<std::string> pauseMenuOptions = { "Resume", "Exit" };
-	int optionIndex = 0;
+	// 메인 메뉴 변수
+	std::vector<std::string> mainMenuOptions = { "START GAME", "EXIT GAME" };
+	std::vector<std::string> mainMenuAscii;
+	Vector2 mainMenuArtSize;
+	int mainMenuOptionIndex = 0;
 
-	// DrawUI 호출 헬퍼
-	void CallDrawUI(const Vector2& startPos, const char* text, Color color);
+	// 일시정지 메뉴 변수
+	std::vector<std::string> pauseMenuOptions = { "Resume", "Restart", "Return to main Menu" };
+	std::vector<std::string> pauseMenuAscii;
+	Vector2 pauseMenuSize;
+	int pauseoptionIndex = 0;
 
-private:
-	//// UI 출력 함수
-	//void DrawUI(const Vector2& statrPos, const char* text, Color color = Color::White);
-
+	// 게임 오버 / 클리어 변수
+	std::vector<std::string> gameOverAscii;
+	Vector2 gameOverSize;
+	std::vector<std::string> gameClearAscii;
+	Vector2 gameClearSize;
+	float finalPlayTime = 0.0f;
 };
 

@@ -26,13 +26,17 @@ class PaperLevel : public Level
 public:
 	PaperLevel();
 	~PaperLevel();
-
+	
 	inline int GetMapWidth() { return mapWidth; }
 
 	inline int GetMapHeight() { return mapHeight; }
 
 	// 맵 사이즈 반환 함수
 	virtual Vector2 GetRenderSize() const override;
+
+	// 가장 가까운 페이퍼 위치 반환 함수
+	Vector2 GetNearestPaperPosition(const Vector2& playerPosition) const;
+
 
 private:
 	// 맵 로드 함수
@@ -71,6 +75,8 @@ public:
 	// 페이터 수집 상태 확인
 	void CheckPaperCollectionStatus(Player* player);
 
+	inline float GetPlayTime() const { return playTime; }
+
 private:
 	int mapWidth;
 	int mapHeight;
@@ -90,15 +96,15 @@ private:
 	// 플레이 타임
 	float playTime = 0.0f;
 
-	//Todo: 삭제 예정
-	//// 클리어 조건 미충족 메세지 출력
-	//std::string currentMessage;
-	//float messageDisplayTime = 0.0f;
-
 	// 클리어 조건 타이머 변수
 	bool timerStarted = false;
 	float remainingTime = 0.0f;
-	float timeLimit = 30.0f;
+	float timeLimit = 180.0f;
+
+	// 페이퍼 HUD 변수
+	float paperBlinkTimer = 0.0f;
+	float paperBlinkDuration = 0.5f;
+	float paperBlinkInterval = 0.1f;
 
 
 };
