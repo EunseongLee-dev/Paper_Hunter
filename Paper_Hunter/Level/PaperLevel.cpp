@@ -14,11 +14,12 @@
 #include <iostream>
 
 
+
 PaperLevel::PaperLevel()
 {
 	//Manager 객체 생성
 	gamemanager = new GameFlowManager(this);
-	LoadMap("PaperMap.txt");
+	LoadMap("../Assets/PaperMap.txt");
 
 	// 초기 게임 상태 설정(MainMenu)
 	gamemanager->SetGameState(GameState::MainMenu);
@@ -68,11 +69,12 @@ void PaperLevel::LoadMap(const char* filename)
 
 	// 파일 로드
 	char path[2048] = {};
-	sprintf_s(path, "../../../../Assets/%s", filename);
-	//sprintf_s(path, "../Assets/%s", filename);
+
+	sprintf_s(path, filename);
 
 	// 파일 열기
 	FILE* file = nullptr;
+
 	fopen_s(&file, path, "rb");
 
 	// 예외 처리
